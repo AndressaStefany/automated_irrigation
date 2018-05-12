@@ -1,12 +1,16 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>        // Include the mDNS library
 
-const char* ssid     = "Ramos";
-const char* password = "D_yP7xuC6";
+//const char* ssid     = "Ramos";
+//const char* password = "D_yP7xuC6";
+
+
+const char* ssid     = "Ramos2";
+const char* password = "iwsmv_73876";
 
 WiFiServer server(5780);
 
-char buff[3];
+char buff[5];
 uint8_t x= 0;
 int estado= LOW;
 
@@ -24,8 +28,8 @@ void setup() {
   Serial.println(ssid);
   
   WiFi.mode(WIFI_STA);
-  IPAddress ip(192, 168, 0, 111); // where xx is the desired IP Address
-  IPAddress gateway(192, 168, 0, 1); // set gateway to match your network
+  IPAddress ip(192, 168, 2, 111); // where xx is the desired IP Address
+  IPAddress gateway(192, 168, 2, 1); // set gateway to match your network
   Serial.print(F("Setting static ip to : "));
   Serial.println(ip);
   IPAddress subnet(255, 255, 255, 0); // set subnet mask to match your network
@@ -47,6 +51,7 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   server.begin();
+  server.setNoDelay(true);
   Serial.println("Server started");
 }
 
@@ -54,51 +59,75 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   WiFiClient client = server.available();
-  if (!client) {
-    return;
-  }
-  Serial.println("new client");
-  int max_delay= 0;
-  while(!client.available() && max_delay<=500){
-    delay(1);
-    max_delay++;
-  }
-  if(max_delay < 500)
+  if(!client)
   {
-    Serial.println("Disponivel");
-    client.setNoDelay(true);
-    double t1= 0;
-    while(client.connected())
+    Serial.println("Esperando");
+  }
+  else
+  {
+    Serial.println("Novo cliente conectado");
+    int max_delay= 0;
+    while(!client.available() && max_delay<=500){
+      delay(1);
+      max_delay++;
+    }
+    if(max_delay < 500)
     {
-      if(millis()-t1>500)
+      Serial.println("Disponivel");
+      client.setNoDelay(true);
+      double t1= 0;
+      while(client.connected())
       {
-        Serial.println(x);
-        client.write(x);
-        client.flush();
-        x++;
-        t1= millis();
-      }
-      
-      int len= client.read((uint8_t*)&buff[0], 2);
-      if(len>0)
-      {
-        Serial.print(buff);
-        Serial.print(" ");
-        Serial.println(len);
-        if(buff[0] == 'o')
+        if(millis()-t1>500)
         {
-          Serial.println("Dados sensor recebido");
+          Serial.println(x);
+          client.write(x);
+          client.flush();
+          x++;
+          t1= millis();
         }
-        else if(buff[0] == 'k')
+        int len= client.read((uint8_t*)&buff[0], 5);
+        if(len>0)
         {
-          estado= buff[1]-'0';
-          digitalWrite(D1, estado);
+          //Serial.print(buff);
+          Serial.print("Tamanho: ");
+          Serial.println(len);
+          if(buff[0] == 1)
+          {
+            Serial.print("Modo 1 ");
+            unsigned int hora= buff[2]+(buff[1]<<8);
+            unsigned int duracao= buff[4]+(buff[3]<<8);
+            Serial.print(hora);
+            Serial.print(" ");
+            Serial.print(duracao);
+          }
+          else if(buff[0] == 2)
+          {
+            Serial.println("Modo 2");
+          }
+          else if(buff[0] == 3)
+          {
+            Serial.println("Modo 3");
+          }
+          else if(buff[0] == 4)
+          {
+            Serial.println("Modo 4");
+          }
+          else if(buff[0] == 5)
+          {
+            Serial.println("Modo 5");
+          }
+          else if(buff[0] == 6)
+          {
+            Serial.println("Modo 6");
+          }
+          Serial.println("");
+          client.flush();
+          for(int i=0; i<5; i++)
+            buff[i]= 0;
         }
-        client.flush();
-        buff[0]= 0;
-        buff[1]= 0;
+        delay(20);
       }
-      delay(20);
     }
   }
 }
