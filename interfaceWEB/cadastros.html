@@ -57,14 +57,15 @@
                     <div class="form-group">
                         <div class="row">
                             <div class="col">
-                                <label class="padding-right" for="exampleFormControlSelect1">Modo</label>
-                                <select name="modo" class="form-control" id="exampleFormControlSelect1">
-                                    <option>1</option>
-                                    <option>2</option>
-                                    <option>3</option>
-                                    <option>4</option>
-                                    <option>5</option>
-                                    <option>5</option>
+                                <label class="padding-right" for="formControlSelect1">Modo</label>
+                                <select name="modo" class="form-control" id="formControlSelect1" onchange="campos();">
+                                    <option value="0">--</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
                                 </select>                              
                             </div>
                             <div class="col">                                
@@ -72,8 +73,9 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="exampleInput1">Intervalo para a Irrigação</label>
-                        <input type="number" name="minutos" class="form-control" id="exampleInput1" aria-describedby="emailHelp" placeholder="minutos">
+                        <label for="minutos">Intervalo para a Irrigação</label>
+                        <input type="number" name="minutos" class="form-control" id="minutos" aria-describedby="" 
+                                placeholder="minutos" disabled>
                         <small id="emailHelp" class="form-text text-muted">
                             em minutos
                         </small>
@@ -82,16 +84,16 @@
                         <label for="exampleInputEmail1">Temperatura</label>
                         <div class="row">
                             <div class="col">
-                                <input type="number" name="temp_min" class="form-control" placeholder="°C">
-                                <small id="emailHelp" class="form-text text-muted">
+                                <input type="number" name="temp_min" id="temp_min" class="form-control" placeholder="°C" disabled>
+                                <small id="" class="form-text text-muted">
                                     temperatura mínima
                                 </small>
                             </div>
                             <div class="col">
-                                <input type="number" name="temp_max" class="form-control" placeholder="°C">
-                                <small id="emailHelp" class="form-text text-muted">
-                                        temperatura máxima
-                                    </small>
+                                <input type="number" name="temp_max" id="temp_max" class="form-control" placeholder="°C" disabled>
+                                <small id="" class="form-text text-muted">
+                                    temperatura máxima
+                                </small>
                             </div>
                         </div>
                     </div>
@@ -99,31 +101,28 @@
                         <label for="exampleInputEmail1">Umidade</label>
                         <div class="row">
                             <div class="col">
-                                <input type="number" name="umi_min" class="form-control" placeholder="">
-                                <small id="emailHelp" class="form-text text-muted">
+                                <input type="number" name="umi_min" id="umi_min" class="form-control" placeholder="" disabled>
+                                <small id="" class="form-text text-muted">
                                     umidade mínima
                                 </small>
                             </div>
                             <div class="col">
-                                <input type="number" name="umi_max" class="form-control" placeholder="">
-                                <small id="emailHelp" class="form-text text-muted">
+                                <input type="number" name="umi_max" id="umi_max" class="form-control" placeholder="" disabled>
+                                <small id="" class="form-text text-muted">
                                     umidade máxima
                                 </small>
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="exampleInputEmail1">Horário do Dia</label>
-                        <input type="time" name="tempo" class="form-control" id="exampleInput1" aria-describedby="emailHelp" placeholder="HH:MM">
-                        <small id="emailHelp" class="form-text text-muted">
+                        <label for="time">Horário do Dia</label>
+                        <input type="time" name="tempo" class="form-control" id="time" aria-describedby="" 
+                                placeholder="HH:MM" disabled>
+                        <small id="" class="form-text text-muted">
                             exemplo 15:10 (quinze horas e dez minutos)
                         </small>
                     </div>
-                    <!-- <div class="form-group form-check">
-                        <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                        <label class="form-check-label" for="exampleCheck1">Check me out</label>
-                    </div> -->
-                    <button type="submit" class="btn btn-primary">Cadastrar</button>
+                    <button type="submit" class="btn btn-primary" id="cadastrar" disabled>Cadastrar</button>
                 </form>
             </div>
         </div>
@@ -138,6 +137,7 @@
     <script src="vendor/components/jquery/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.3/js/tether.min.js"></script>
     <script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="form.js"></script>
   
 </body>
 </html>
