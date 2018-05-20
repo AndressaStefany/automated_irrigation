@@ -1,5 +1,3 @@
-# socket_echo_client.py
-
 import socket
 import struct
 import time
@@ -7,24 +5,10 @@ from threading import Thread
 import psycopg2
 from http.server import BaseHTTPRequestHandler, HTTPServer, SimpleHTTPRequestHandler
 
-# hora e intervalo em minutos
-Modo_1 = [1, 257, 33]
-# Min e max da umidade
-Modo_2 = [2, 20, 60]
-# Min umidade e invervalo
-Modo_3 = [3, 20, 55]
-# Min e max da temperatura
-Modo_4 = [4, 10, 35]
-# Max da temperatura e intervalo
-Modo_5 = [5, 35, 60]
-# Mod2 and/or Mod4
-# 0 - or; 1 - and
-Modo_6 = [6, 1]
-
 
 class Node:
     def __init__(self):
-        self.server_adddress = ('192.168.2.111', 5780)
+        self.server_adddress = ('192.168.0.111', 5780)
         self.connected= False
         #self.sock= None
         self.connect_node()
@@ -60,7 +44,7 @@ class Node:
                     self.connect()
                     time.sleep(0.5)
             try:
-                sql = 'insert into haha (temp) values ({})'.format(struct.unpack('B', data)[0])
+                sql = 'insert into teste (valor) values ({})'.format(struct.unpack('B', data)[0])
                 cur.execute(sql)
                 con.commit()
             except:
@@ -82,15 +66,28 @@ class HttpServer(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         #TODO formulario com dados dos modos e enviar para node
+        # hora e intervalo em minutos
+        Modo_1 = [1, 257, 33]
+        # Min e max da umidade
+        Modo_2 = [2, 20, 60]
+        # Min umidade e invervalo
+        Modo_3 = [3, 20, 55]
+        # Min e max da temperatura
+        Modo_4 = [4, 10, 35]
+        # Max da temperatura e intervalo
+        Modo_5 = [5, 35, 60]
+        # Mod2 and/or Mod4
+        # 0 - or; 1 - and
+        Modo_6 = [6, 1]
         #node.send_data(Modo_1)
         print("Post")
 
 print('starting PostgreSQL connection')
-con = psycopg2.connect(host='localhost', database='mydb', user='postgres', password='admin')
+con = psycopg2.connect(host='localhost', database='nodemcu', user='postgres', password='admin')
 cur = con.cursor()
 
 print('starting node')
-node= Node()
+node = Node()
 
 print('starting server...')
 server_address = ('', 8081)
