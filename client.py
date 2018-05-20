@@ -4,6 +4,7 @@ import socket
 import struct
 import time
 from threading import Thread
+import psycopg2
 from http.server import BaseHTTPRequestHandler, HTTPServer, SimpleHTTPRequestHandler
 
 # hora e intervalo em minutos
@@ -19,6 +20,7 @@ Modo_5 = [5, 35, 60]
 # Mod2 and/or Mod4
 # 0 - or; 1 - and
 Modo_6 = [6, 1]
+
 
 class Node:
     def __init__(self):
@@ -49,7 +51,7 @@ class Node:
         while 1:
             try:
                 data = self.sock.recv(1)
-                print(struct.unpack('B', data))
+                print(struct.unpack('B', data)[0])
             except:
                 print('Connection lost recv')
                 self.connected= False
@@ -57,6 +59,12 @@ class Node:
                 while not self.connected:
                     self.connect()
                     time.sleep(0.5)
+            try:
+                sql = 'insert into haha (temp) values ({})'.format(struct.unpack('B', data)[0])
+                cur.execute(sql)
+                con.commit()
+            except:
+                print('Error on saving on database')
 
     def send_data(self, Modo_1):
         if self.connected:
@@ -77,11 +85,15 @@ class HttpServer(SimpleHTTPRequestHandler):
         #node.send_data(Modo_1)
         print("Post")
 
+print('starting PostgreSQL connection')
+con = psycopg2.connect(host='localhost', database='mydb', user='postgres', password='admin')
+cur = con.cursor()
+
 print('starting node')
 node= Node()
 
 print('starting server...')
-server_address = ('127.0.0.1', 8081)
+server_address = ('', 8081)
 httpd = HTTPServer(server_address, HttpServer)
 print('running server...')
 httpd.serve_forever()
