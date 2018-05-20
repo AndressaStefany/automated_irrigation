@@ -51,10 +51,10 @@
         <div class="col-6 center">
             <div class="row justify-content-center">
         <h2>Cadastro dos Dados para Irrigação</h2>
-        <form>
+        <form method="post">
             <div class="form-group">
                 <label for="exampleInput1">Intervalo para a Irrigação</label>
-                <input type="number" class="form-control" id="exampleInput1" aria-describedby="emailHelp" placeholder="minutos">
+                <input type="number" name="minutos" class="form-control" id="exampleInput1" aria-describedby="emailHelp" placeholder="minutos">
                 <small id="emailHelp" class="form-text text-muted">
                     em minutos
                 </small>
@@ -63,13 +63,13 @@
                 <label for="exampleInputEmail1">Temperatura</label>
                 <div class="row">
                     <div class="col">
-                        <input type="number" class="form-control" placeholder="°C">
+                        <input type="number" name="temp_min" class="form-control" placeholder="°C">
                         <small id="emailHelp" class="form-text text-muted">
                             temperatura mínima
                         </small>
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control" placeholder="°C">
+                        <input type="number" name="temp_max" class="form-control" placeholder="°C">
                         <small id="emailHelp" class="form-text text-muted">
                                 temperatura máxima
                             </small>
@@ -80,13 +80,13 @@
                 <label for="exampleInputEmail1">Umidade</label>
                 <div class="row">
                     <div class="col">
-                        <input type="number" class="form-control" placeholder="">
+                        <input type="number" name="umi_min" class="form-control" placeholder="">
                         <small id="emailHelp" class="form-text text-muted">
                             umidade mínima
                         </small>
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control" placeholder="">
+                        <input type="number" name="umi_max" class="form-control" placeholder="">
                         <small id="emailHelp" class="form-text text-muted">
                             umidade máxima
                         </small>
@@ -95,7 +95,7 @@
             </div>
             <div class="form-group">
                 <label for="exampleInputEmail1">Horário do Dia</label>
-                <input type="time" class="form-control" id="exampleInput1" aria-describedby="emailHelp" placeholder="HH:MM">
+                <input type="time" name="tempo" class="form-control" id="exampleInput1" aria-describedby="emailHelp" placeholder="HH:MM">
                 <small id="emailHelp" class="form-text text-muted">
                     exemplo 15:10 (quinze horas e dez minutos)
                 </small>
