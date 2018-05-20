@@ -4,6 +4,8 @@ import time
 from threading import Thread
 import psycopg2
 from http.server import BaseHTTPRequestHandler, HTTPServer, SimpleHTTPRequestHandler
+from cgi import parse_header, parse_multipart
+from urllib.parse import parse_qs
 from io import BytesIO
 import os
 
@@ -65,6 +67,19 @@ class HttpServer(SimpleHTTPRequestHandler):
     def do_GET(self):
         SimpleHTTPRequestHandler.do_GET(self)
 
+    def parse_POST(self):
+        ctype, pdict = parse_header(self.headers['content-type'])
+        if ctype == 'multipart/form-data':
+            postvars = parse_multipart(self.rfile, pdict)
+        elif ctype == 'application/x-www-form-urlencoded':
+            length = int(self.headers['content-length'])
+            postvars = parse_qs(
+                self.rfile.read(length),
+                keep_blank_values=1)
+        else:
+            postvars = {}
+        return postvars
+
     def do_POST(self):
         #TODO formulario com dados dos modos e enviar para node
         # hora e intervalo em minutos
@@ -82,18 +97,22 @@ class HttpServer(SimpleHTTPRequestHandler):
         Modo_6 = [6, 1]
         #node.send_data(Modo_1)
 
-        content_length = int(self.headers['Content-Length'])
-        body = self.rfile.read(content_length)
-        print(body)
-        self.send_response(200)
-        self.end_headers()
-        response = BytesIO()
-        response.write(b'This is POST request. ')
-        response.write(b'Received: ')
-        response.write(body)
-        self.wfile.write(response.getvalue())
-
         print("Post")
+        postvars = self.parse_POST()
+        print(postvars)
+
+        SimpleHTTPRequestHandler.do_GET(self)
+
+        # content_length = int(self.headers['Content-Length'])
+        # body = self.rfile.read(content_length)
+        # print(body)
+        # self.send_response(200)
+        # self.end_headers()
+        # response = BytesIO()
+        # response.write(b'This is POST request. ')
+        # response.write(b'Received: ')
+        # response.write(body)
+        # self.wfile.write(response.getvalue())
 
 
 print('starting PostgreSQL connection')
