@@ -20,24 +20,6 @@ Modo_5 = [5, 35, 60]
 # 0 - or; 1 - and
 Modo_6 = [6, 1]
 
-class HttpServer(SimpleHTTPRequestHandler):
-    def do_GET(self):
-        SimpleHTTPRequestHandler.do_GET(self)
-
-    def do_POST(self):
-        print("Post")
-
-
-print('starting server...')
-# Server settings
-# Choose port 8080, for port 80, which is normally used for a http server, you need root access
-server_address = ('127.0.0.1', 8081)
-httpd = HTTPServer(server_address, HttpServer)
-print('running server...')
-httpd.serve_forever()
-
-exit(0)
-
 class Node:
     def __init__(self):
         self.server_adddress = ('192.168.2.111', 5780)
@@ -86,7 +68,20 @@ class Node:
                 self.connected = False
                 self.sock.close()
 
+class HttpServer(SimpleHTTPRequestHandler):
+    def do_GET(self):
+        SimpleHTTPRequestHandler.do_GET(self)
+
+    def do_POST(self):
+        #TODO formulario com dados dos modos e enviar para node
+        #node.send_data(Modo_1)
+        print("Post")
+
+print('starting node')
 node= Node()
-while 1:
-    node.send_data(Modo_1)
-    time.sleep(1)
+
+print('starting server...')
+server_address = ('127.0.0.1', 8081)
+httpd = HTTPServer(server_address, HttpServer)
+print('running server...')
+httpd.serve_forever()
