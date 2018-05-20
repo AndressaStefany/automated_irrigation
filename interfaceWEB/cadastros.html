@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="vendor/favicon.icon">
+
+    <title>Index</title>
+
+    <!-- Bootstrap CSS -->
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous"> -->
+    <link href="vendor/twbs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+    <!-- Custom styles for this template -->
+    <link href="navbar-top-fixed.css" rel="stylesheet">
+  </head>
+  <body>
+      <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+            <a class="navbar-brand" href="index.html">
+                <img src="icons/folhaPreenchida.png" width="30px">
+            </a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="index.html">
+                  Início
+                  <!-- <span class="sr-only">(current)</span> -->
+                </a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="cadastros.html">Cadastros</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="historico.html">Histórico</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="contato.html">Contato</a>
+                </li>
+            </ul>
+          </div>
+        </nav>
+
+    <div class="container">
+      <div class="row">
+        <div class="col">
+        </div>
+        <div class="col-6 center">
+            <div class="row justify-content-center">
+        <h2>Cadastro dos Dados para Irrigação</h2>
+        <form>
+            <div class="form-group">
+                <label for="exampleInput1">Intervalo para a Irrigação</label>
+                <input type="number" class="form-control" id="exampleInput1" aria-describedby="emailHelp" placeholder="minutos">
+                <small id="emailHelp" class="form-text text-muted">
+                    em minutos
+                </small>
+            </div>
+            <div class="form-group">
+                <label for="exampleInputEmail1">Temperatura</label>
+                <div class="row">
+                    <div class="col">
+                        <input type="number" class="form-control" placeholder="°C">
+                        <small id="emailHelp" class="form-text text-muted">
+                            temperatura mínima
+                        </small>
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control" placeholder="°C">
+                        <small id="emailHelp" class="form-text text-muted">
+                                temperatura máxima
+                            </small>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="exampleInputEmail1">Umidade</label>
+                <div class="row">
+                    <div class="col">
+                        <input type="number" class="form-control" placeholder="">
+                        <small id="emailHelp" class="form-text text-muted">
+                            umidade mínima
+                        </small>
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control" placeholder="">
+                        <small id="emailHelp" class="form-text text-muted">
+                            umidade máxima
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="exampleInputEmail1">Horário do Dia</label>
+                <input type="time" class="form-control" id="exampleInput1" aria-describedby="emailHelp" placeholder="HH:MM">
+                <small id="emailHelp" class="form-text text-muted">
+                    exemplo 15:10 (quinze horas e dez minutos)
+                </small>
+            </div>
+            <!-- <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                <label class="form-check-label" for="exampleCheck1">Check me out</label>
+            </div> -->
+            <button type="submit" class="btn btn-primary">Cadastrar</button>
+        </form>
+            </div>
+        </div>
+        <div class="col">
+        </div>
+      </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="vendor/components/jquery/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.3/js/tether.min.js"></script>
+    <script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
+  
+  </body>
+</html>
