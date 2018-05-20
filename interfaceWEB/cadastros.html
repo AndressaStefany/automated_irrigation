@@ -48,10 +48,65 @@
       <div class="row">
         <div class="col">
         </div>
-        <div class="col-8 center">
-          <div class="row justify-content-md-center">
-            <h1>AGenRiga</h1>
-          </div>
+        <div class="col-6 center">
+            <div class="row justify-content-center">
+        <h2>Cadastro dos Dados para Irrigação</h2>
+        <form>
+            <div class="form-group">
+                <label for="exampleInput1">Intervalo para a Irrigação</label>
+                <input type="number" class="form-control" id="exampleInput1" aria-describedby="emailHelp" placeholder="minutos">
+                <small id="emailHelp" class="form-text text-muted">
+                    em minutos
+                </small>
+            </div>
+            <div class="form-group">
+                <label for="exampleInputEmail1">Temperatura</label>
+                <div class="row">
+                    <div class="col">
+                        <input type="number" class="form-control" placeholder="°C">
+                        <small id="emailHelp" class="form-text text-muted">
+                            temperatura mínima
+                        </small>
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control" placeholder="°C">
+                        <small id="emailHelp" class="form-text text-muted">
+                                temperatura máxima
+                            </small>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="exampleInputEmail1">Umidade</label>
+                <div class="row">
+                    <div class="col">
+                        <input type="number" class="form-control" placeholder="">
+                        <small id="emailHelp" class="form-text text-muted">
+                            umidade mínima
+                        </small>
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control" placeholder="">
+                        <small id="emailHelp" class="form-text text-muted">
+                            umidade máxima
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="exampleInputEmail1">Horário do Dia</label>
+                <input type="time" class="form-control" id="exampleInput1" aria-describedby="emailHelp" placeholder="HH:MM">
+                <small id="emailHelp" class="form-text text-muted">
+                    exemplo 15:10 (quinze horas e dez minutos)
+                </small>
+            </div>
+            <!-- <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                <label class="form-check-label" for="exampleCheck1">Check me out</label>
+            </div> -->
+            <button type="submit" class="btn btn-primary">Cadastrar</button>
+        </form>
+            </div>
         </div>
         <div class="col">
         </div>
