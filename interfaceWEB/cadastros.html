@@ -53,7 +53,7 @@
                 <div style="margin-bottom: 30px;">
                     <h2>Cadastro dos Dados para Irrigação</h2>
                 </div>
-                <form method="post">
+                <form method="post" class="needs-validation" novalidate>
                     <div class="form-group">
                         <div class="row">
                             <div class="col">
@@ -76,6 +76,9 @@
                         <label for="minutos">Intervalo para a Irrigação</label>
                         <input type="number" name="minutos" class="form-control" id="minutos" aria-describedby="" 
                                 placeholder="minutos" disabled>
+                        <div class="invalid-feedback">
+                            Por favor, informe os minutos da irrigação.
+                        </div>
                         <small id="emailHelp" class="form-text text-muted">
                             em minutos
                         </small>
@@ -85,12 +88,18 @@
                         <div class="row">
                             <div class="col">
                                 <input type="number" name="temp_min" id="temp_min" class="form-control" placeholder="°C" disabled>
+                                <div class="invalid-feedback">
+                                    Por favor, informe a temperatura mínima.
+                                </div>
                                 <small id="" class="form-text text-muted">
                                     temperatura mínima
                                 </small>
                             </div>
                             <div class="col">
                                 <input type="number" name="temp_max" id="temp_max" class="form-control" placeholder="°C" disabled>
+                                <div class="invalid-feedback">
+                                    Por favor, informe a temperatura máxima.
+                                </div>
                                 <small id="" class="form-text text-muted">
                                     temperatura máxima
                                 </small>
@@ -102,12 +111,18 @@
                         <div class="row">
                             <div class="col">
                                 <input type="number" name="umi_min" id="umi_min" class="form-control" placeholder="" disabled>
+                                <div class="invalid-feedback">
+                                        Por favor, informe o valor mínimo da umidade.
+                                </div>
                                 <small id="" class="form-text text-muted">
                                     umidade mínima
                                 </small>
                             </div>
                             <div class="col">
                                 <input type="number" name="umi_max" id="umi_max" class="form-control" placeholder="" disabled>
+                                <div class="invalid-feedback">
+                                    Por favor, informe o valor máximo da umidade.
+                                </div>
                                 <small id="" class="form-text text-muted">
                                     umidade máxima
                                 </small>
@@ -118,6 +133,9 @@
                         <label for="time">Horário do Dia</label>
                         <input type="time" name="tempo" class="form-control" id="time" aria-describedby="" 
                                 placeholder="HH:MM" disabled>
+                        <div class="invalid-feedback">
+                            Por favor, informe o horário da irrigação.
+                        </div>
                         <small id="" class="form-text text-muted">
                             exemplo 15:10 (quinze horas e dez minutos)
                         </small>
