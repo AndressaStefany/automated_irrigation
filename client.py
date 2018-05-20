@@ -4,7 +4,8 @@ import time
 from threading import Thread
 import psycopg2
 from http.server import BaseHTTPRequestHandler, HTTPServer, SimpleHTTPRequestHandler
-
+from io import BytesIO
+import os
 
 class Node:
     def __init__(self):
@@ -35,7 +36,7 @@ class Node:
         while 1:
             try:
                 data = self.sock.recv(1)
-                print(struct.unpack('B', data)[0])
+                #print(struct.unpack('B', data)[0])
             except:
                 print('Connection lost recv')
                 self.connected= False
@@ -80,7 +81,20 @@ class HttpServer(SimpleHTTPRequestHandler):
         # 0 - or; 1 - and
         Modo_6 = [6, 1]
         #node.send_data(Modo_1)
+
+        content_length = int(self.headers['Content-Length'])
+        body = self.rfile.read(content_length)
+        print(body)
+        self.send_response(200)
+        self.end_headers()
+        response = BytesIO()
+        response.write(b'This is POST request. ')
+        response.write(b'Received: ')
+        response.write(body)
+        self.wfile.write(response.getvalue())
+
         print("Post")
+
 
 print('starting PostgreSQL connection')
 con = psycopg2.connect(host='localhost', database='nodemcu', user='postgres', password='admin')
@@ -90,6 +104,8 @@ print('starting node')
 node = Node()
 
 print('starting server...')
+web_dir = os.path.join(os.path.dirname(__file__), 'interfaceWEB')
+os.chdir(web_dir)
 server_address = ('', 8081)
 httpd = HTTPServer(server_address, HttpServer)
 print('running server...')
