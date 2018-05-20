@@ -4,6 +4,7 @@ import socket
 import struct
 import time
 from threading import Thread
+from http.server import BaseHTTPRequestHandler, HTTPServer, SimpleHTTPRequestHandler
 
 # hora e intervalo em minutos
 Modo_1 = [1, 257, 33]
@@ -19,47 +20,73 @@ Modo_5 = [5, 35, 60]
 # 0 - or; 1 - and
 Modo_6 = [6, 1]
 
-class MyThread(Thread):
+class HttpServer(SimpleHTTPRequestHandler):
+    def do_GET(self):
+        SimpleHTTPRequestHandler.do_GET(self)
 
-    def __init__(self, sock):
-        Thread.__init__(self)
-        self.sock = sock
+    def do_POST(self):
+        print("Post")
 
-    def run(self):
+
+print('starting server...')
+# Server settings
+# Choose port 8080, for port 80, which is normally used for a http server, you need root access
+server_address = ('127.0.0.1', 8081)
+httpd = HTTPServer(server_address, HttpServer)
+print('running server...')
+httpd.serve_forever()
+
+exit(0)
+
+class Node:
+    def __init__(self):
+        self.server_adddress = ('192.168.2.111', 5780)
+        self.connected= False
+        #self.sock= None
+        self.connect_node()
         try:
-            while 1:
-                data = self.sock.recv(1)
-                #self.sock.send(b'oo')
-                print(struct.unpack('B', data))
-                #time.sleep(0.5)
+            self.t= Thread(target=self.recv_data)
+            self.t.start()
         except:
-            self.sock.close()
+            print('Error on creating recv thread')
 
-# Create a TCP/IP socket
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def connect_node(self):
+        print('Attempt to connect {} port {}'.format(*self.server_adddress))
+        try:
+            # Create a TCP/IP socket
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.connect(self.server_adddress)
+            self.sock.send(b'ok')
+            self.connected= True
+            print('Successfully connected')
+        except socket.error as e:
+            print('Error on attempt to connect', e)
+            self.connected = False
 
-# Connect the socket to the port where the server is listening
-server_address = ('192.168.2.111', 5780)
-print('connecting to {} port {}'.format(*server_address))
-sock.connect(server_address)
-sock.send(b'ok')
+    def recv_data(self):
+        while 1:
+            try:
+                data = self.sock.recv(1)
+                print(struct.unpack('B', data))
+            except:
+                print('Connection lost recv')
+                self.connected= False
+                self.sock.close()
+                while not self.connected:
+                    self.connect()
+                    time.sleep(0.5)
 
+    def send_data(self, Modo_1):
+        if self.connected:
+            try:
+                data = struct.pack(">Bhh", Modo_1[0], Modo_1[1], Modo_1[2])
+                self.sock.send(data)
+            except:
+                print('Connection lost send')
+                self.connected = False
+                self.sock.close()
+
+node= Node()
 while 1:
-    t = MyThread(sock=sock)
-    t.start()
-    while t.isAlive():
-        #sock.send(b'k0')
-        #time.sleep(1)
-        #sock.send(b'k1')
-        #time.sleep(1)
-
-        teste = struct.pack(">Bhh", Modo_1[0], Modo_1[1], Modo_1[2])
-        sock.send(teste)
-        time.sleep(1)
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_address = ('192.168.2.111', 5780)
-    print('connecting to {} port {}'.format(*server_address))
-    sock.connect(server_address)
-    sock.send(b'ok')
+    node.send_data(Modo_1)
     time.sleep(1)
