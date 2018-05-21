@@ -12,47 +12,86 @@ WiFiClient client;
 
 char buff[10];
 float temperature= 0, humidity= 0;
-int estado= LOW, max_delay= 0, len;
-unsigned short hora, duracao;
+int estado= LOW, max_delay= 0, len= 0;
+float minuto_atual;
+unsigned short modo, minuto_irrigar, intervalo_irrigar, temp_min, temp_max, hum_min, hum_max;
 
 void process_mode()
 {
-  //Serial.print(buff);
   Serial.print("Tamanho: ");
   Serial.println(len);
-  if(buff[0] == 1)
+  modo= buff[0];
+  if(modo == 1)
   {
     Serial.print("Modo 1 ");
-    hora= *((unsigned short*)&buff[1]); // buff[2]+(buff[1]<<8);
-    duracao= *((unsigned short*)&buff[3]);//buff[4]+(buff[3]<<8);
+    memcpy(&minuto_irrigar,&buff[1],2);
+    memcpy(&intervalo_irrigar,&buff[3],2);
 
-    Serial.print(hora);
+    Serial.print(minuto_irrigar);
     Serial.print(" ");
-    Serial.print(duracao);
+    Serial.print(intervalo_irrigar);
   }
-  else if(buff[0] == 2)
+  else if(modo == 2)
   {
     Serial.println("Modo 2");
+    memcpy(&hum_min,&buff[1],2);
+    memcpy(&hum_max,&buff[3],2);
+
+    Serial.print(hum_min);
+    Serial.print(" ");
+    Serial.print(hum_max);
   }
-  else if(buff[0] == 3)
+  else if(modo == 3)
   {
     Serial.println("Modo 3");
+    memcpy(&hum_min,&buff[1],2);
+    memcpy(&hum_max,&buff[3],2);
+
+    Serial.print(hum_min);
+    Serial.print(" ");
+    Serial.print(hum_max);
   }
-  else if(buff[0] == 4)
+  else if(modo == 4)
   {
     Serial.println("Modo 4");
+    memcpy(&temp_min,&buff[1],2);
+    memcpy(&temp_max,&buff[3],2);
+
+    Serial.print(temp_min);
+    Serial.print(" ");
+    Serial.print(temp_max);
   }
-  else if(buff[0] == 5)
+  else if(modo == 5)
   {
     Serial.println("Modo 5");
+    memcpy(&temp_max,&buff[1],2);
+    memcpy(&intervalo_irrigar,&buff[3],2);
+
+    Serial.print(temp_max);
+    Serial.print(" ");
+    Serial.print(intervalo_irrigar);
   }
-  else if(buff[0] == 6)
+  else if(modo == 6)
   {
+    len= client.read((uint8_t*)&buff[5], 4);
     Serial.println("Modo 6");
+
+    memcpy(&temp_min,&buff[1],2);
+    memcpy(&temp_max,&buff[3],2);
+    memcpy(&hum_min,&buff[5],2);
+    memcpy(&hum_max,&buff[7],2);
+
+    Serial.print(temp_min);
+    Serial.print(" ");
+    Serial.print(temp_max);
+    Serial.print(" ");
+    Serial.print(hum_min);
+    Serial.print(" ");
+    Serial.print(hum_max);
   }
   Serial.println("");
   client.flush();
-  for(int i=0; i<5; i++)
+  for(int i=0; i<10; i++)
     buff[i]= 0;
 }
 
@@ -64,6 +103,46 @@ void get_sensors_data()
   Serial.println(humidity);
   temperature+=0.125;
   humidity+=0.125;
+}
+
+void do_irrigation()
+{
+  static int dt= millis()-dt;
+  dt= millis();
+  minuto_atual+=dt/1000/60;
+  if(modo == 1)
+  {
+    if((int(minuto_atual)-minuto_irrigar)%intervalo_irrigar==0)
+    {
+      //irrigar
+    }
+  }
+  else if(modo == 2)
+  {
+    if(humidity<hum_min)
+    {
+      //irrigar
+    }
+  }
+  else if(modo == 3)
+  {
+    if(humidity<hum_min)
+    {
+      //irrigar pelo tempo intervalo_irrigar
+    }
+  }
+  else if(modo == 4)
+  {
+    
+  }
+  else if(modo == 5)
+  {
+    
+  }
+  else if(modo == 6)
+  {
+    
+  }
 }
 
 void setup()
@@ -114,6 +193,7 @@ void loop()
   if(!client)
   {
     Serial.println("Waiting client");
+    do_irrigation();
   }
   else
   {
@@ -130,17 +210,12 @@ void loop()
       double t1= 0;
       while(client.connected())
       {
-        if(millis()-t1>1000) // send sensors data
+        if(millis()-t1>5000) // send sensors data
         {
           get_sensors_data();
           // pack values into buffer
-          unsigned char* ptr_temp= (unsigned char *)&temperature;
-          unsigned char* ptr_umi= (unsigned char *)&humidity;
-          for(int i=0; i<4; i++)
-          {
-            buff[i]= int(ptr_temp[i]);
-            buff[i+4]= int(ptr_umi[i]);
-          }
+          memcpy(&buff[0], &temperature, 4);
+          memcpy(&buff[4], &humidity, 4);
           client.write((uint8_t*)&buff[0], 8);
           client.flush();
           t1= millis();
@@ -150,7 +225,7 @@ void loop()
         {
           process_mode();
         }
-        
+        do_irrigation();
         delay(20);
       }
     }
