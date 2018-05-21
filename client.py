@@ -6,7 +6,6 @@ import psycopg2
 from http.server import BaseHTTPRequestHandler, HTTPServer, SimpleHTTPRequestHandler
 from cgi import parse_header, parse_multipart
 from urllib.parse import parse_qs
-from io import BytesIO
 import os
 
 class Node:
@@ -37,8 +36,8 @@ class Node:
     def recv_data(self):
         while 1:
             try:
-                data = self.sock.recv(1)
-                #print(struct.unpack('B', data)[0])
+                data = self.sock.recv(8)
+                #print(struct.unpack('ff', data))
             except:
                 print('Connection lost recv')
                 self.connected= False
@@ -47,7 +46,7 @@ class Node:
                     self.connect()
                     time.sleep(0.5)
             try:
-                sql = 'insert into teste (valor) values ({})'.format(struct.unpack('B', data)[0])
+                sql = 'insert into teste (valor) values ({})'.format(struct.unpack('ff', data)[0])
                 cur.execute(sql)
                 con.commit()
             except:
@@ -56,7 +55,7 @@ class Node:
     def send_data(self, Modo_1):
         if self.connected:
             try:
-                data = struct.pack(">Bhh", Modo_1[0], Modo_1[1], Modo_1[2])
+                data = struct.pack("<BHH", Modo_1[0], Modo_1[1], Modo_1[2])
                 self.sock.send(data)
             except:
                 print('Connection lost send')
@@ -83,7 +82,7 @@ class HttpServer(SimpleHTTPRequestHandler):
     def do_POST(self):
         #TODO formulario com dados dos modos e enviar para node
         # hora e intervalo em minutos
-        Modo_1 = [1, 257, 33]
+        Modo_1 = [1, 15, 35]
         # Min e max da umidade
         Modo_2 = [2, 20, 60]
         # Min umidade e invervalo
@@ -95,7 +94,7 @@ class HttpServer(SimpleHTTPRequestHandler):
         # Mod2 and/or Mod4
         # 0 - or; 1 - and
         Modo_6 = [6, 1]
-        #node.send_data(Modo_1)
+        node.send_data(Modo_1)
 
         print("Post")
         postvars = self.parse_POST()
