@@ -108,18 +108,19 @@ class HttpServer(SimpleHTTPRequestHandler):
             modo= [postvars[b'modo'], postvars[b'temp_min'], postvars[b'temp_max'], postvars[b'umi_min'], postvars[b'umi_max']]
         node.send_data(modo)
 
-        SimpleHTTPRequestHandler.do_GET(self)
-
-        # content_length = int(self.headers['Content-Length'])
-        # body = self.rfile.read(content_length)
-        # print(body)
-        # self.send_response(200)
-        # self.end_headers()
-        # response = BytesIO()
-        # response.write(b'This is POST request. ')
-        # response.write(b'Received: ')
-        # response.write(body)
-        # self.wfile.write(response.getvalue())
+        f = self.send_head()
+        if f:
+            aux= str(f.read(),'utf-8').strip('\'b')
+            to_format= []
+            for k,r in zip(postvars.keys(),postvars.values()):
+                to_format.append(str(k).strip('\'b'))
+                to_format.append(r)
+            to_format = to_format[::-1]
+            aux=aux.format(*to_format)
+            #print(aux.lstrip('\'b'))
+            self.wfile.write(aux.encode('utf-8'))
+            #self.copyfile(f, self.wfile)
+            f.close()
 
 
 print('starting PostgreSQL connection')
