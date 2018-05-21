@@ -51,7 +51,7 @@
         <div class="col-6 center">
             <div class="row justify-content-center">
                 <div style="margin-bottom: 30px;">
-                    <h2>Cadastro dos Dados para Irrigação</h2>
+                    <h1 class="display-4">Dados para Irrigação</h1>
                 </div>
                 <form method="post" class="needs-validation" novalidate>
                     <div class="form-group">
@@ -140,7 +140,11 @@
                             exemplo 15:10 (quinze horas e dez minutos)
                         </small>
                     </div>
-                    <button type="submit" class="btn btn-primary" id="cadastrar" disabled>Cadastrar</button>
+                    <!-- <button type="submit" class="btn btn-primary" id="cadastrar" disabled>Cadastrar</button> -->
+                    <div class="btn-group align-right" role="group" aria-label="Basic example">
+                        <a type="button" class="btn btn-danger" href="index.html">Cancelar</a>
+                        <button type="submit" class="btn btn-success" id="cadastrar" disabled>Enviar</button>
+                    </div>
                 </form>
             </div>
         </div>
