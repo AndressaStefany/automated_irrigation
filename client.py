@@ -43,7 +43,7 @@ class Node:
                 self.connected= False
                 self.sock.close()
                 while not self.connected:
-                    self.connect()
+                    self.connect_node()
                     time.sleep(0.5)
             try:
                 sql = 'insert into teste (valor) values ({})'.format(struct.unpack('ff', data)[0])
@@ -52,10 +52,12 @@ class Node:
             except:
                 print('Error on saving on database')
 
-    def send_data(self, Modo_1):
+    def send_data(self, modo):
         if self.connected:
             try:
-                data = struct.pack("<BHH", Modo_1[0], Modo_1[1], Modo_1[2])
+                print("<B"+"H"*(len(modo)-1))
+                print([x for x in modo])
+                data = struct.pack("<B"+"H"*(len(modo)-1), *modo)
                 self.sock.send(data)
             except:
                 print('Connection lost send')
@@ -94,11 +96,37 @@ class HttpServer(SimpleHTTPRequestHandler):
         # Mod2 and/or Mod4
         # 0 - or; 1 - and
         Modo_6 = [6, 1]
-        node.send_data(Modo_1)
 
         print("Post")
         postvars = self.parse_POST()
+        #print(postvars)
+        #postvars[b'modo']= int(postvars[b'modo'][0])
+        #postvars[b'minutos'] = int(postvars[b'minutos'][0])
+        #postvars[b'umi_min'] = int(postvars[b'umi_min'][0])
+        #postvars[b'umi_max'] = int(postvars[b'umi_max'][0])
+        #postvars[b'temp_min'] = int(postvars[b'temp_min'][0])
+        #postvars[b'temp_max'] = int(postvars[b'temp_max'][0])
+        for k,r in zip(postvars.keys(),postvars.values()):
+            if not 'tempo' in str(k) : postvars[k]= int(r[0])
+        if b'tempo' in postvars.keys():
+            aux = str(postvars[b'tempo'][0]).strip('b\'').split(':')
+            postvars[b'tempo'] = int(aux[0]) * 60 + int(aux[1])
         print(postvars)
+
+        modo= []
+        if postvars[b'modo'] == 1:
+            modo= [postvars[b'modo'], postvars[b'tempo'], postvars[b'minutos']]
+        if postvars[b'modo'] == 2:
+            modo= [postvars[b'modo'], postvars[b'umi_min'], postvars[b'umi_max']]
+        if postvars[b'modo'] == 3:
+            modo= [postvars[b'modo'], postvars[b'umi_min'], postvars[b'minutos']]
+        if postvars[b'modo'] == 4:
+            modo= [postvars[b'modo'], postvars[b'temp_min'], postvars[b'temp_max']]
+        if postvars[b'modo'] == 5:
+            modo= [postvars[b'modo'], postvars[b'temp_min'], postvars[b'temp_max']]
+        if postvars[b'modo'] == 6:
+            modo= [postvars[b'modo'], postvars[b'temp_min'], postvars[b'temp_max'], postvars[b'umi_min'], postvars[b'umi_max']]
+        node.send_data(modo)
 
         SimpleHTTPRequestHandler.do_GET(self)
 
