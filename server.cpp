@@ -16,6 +16,10 @@ int estado= LOW, max_delay= 0, len= 0;
 float minuto_atual;
 unsigned short modo, minuto_irrigar, intervalo_irrigar, temp_min, temp_max, hum_min, hum_max;
 
+#define S_HUM D1
+#define S_TEMP D2
+#define A_SOL D3
+
 void process_mode()
 {
   Serial.print("Tamanho: ");
@@ -95,21 +99,54 @@ void process_mode()
     buff[i]= 0;
 }
 
+float adc= 0;
+
 void get_sensors_data()
 {
+  digitalWrite(S_TEMP, HIGH);
+  digitalWrite(S_HUM, LOW);
+  delay(20);
+  adc=0;
+  for(int i=0; i<10; i++)
+    adc+= analogRead(A0);
+  adc/=10;
+  
+  temperature= (float)adc/(1023.0-adc)*9860;
+  temperature= temperature/10000;
+  temperature = log(temperature); // ln(R/Ro)
+  temperature /= 3977;                   // 1/B * ln(R/Ro)
+  temperature += 1.0 / (25 + 273.15); // + (1/To)
+  temperature = 1.0 / temperature;                 // Inverte o valor
+  temperature -= 273.15;                         // Converte para Celsius
+
+  digitalWrite(S_TEMP, LOW);
+  digitalWrite(S_HUM, HIGH);
+  delay(20);
+  adc=0;
+  for(int i=0; i<10; i++)
+    adc+= analogRead(A0);
+  adc/=10;
+
+  humidity= 10023.0/(float)adc;
+
+  digitalWrite(S_TEMP, LOW);
+  digitalWrite(S_HUM, LOW);  
+  
   Serial.print("Temperatura ");
   Serial.print(temperature);
   Serial.print(" Umidade ");
   Serial.println(humidity);
-  temperature+=0.125;
-  humidity+=0.125;
+
+  Serial.print("Tempo agora : ");
+  Serial.println(minuto_atual);
 }
 
+int dt, lt;
 void do_irrigation()
 {
-  static int dt= millis()-dt;
-  dt= millis();
-  minuto_atual+=dt/1000/60;
+  dt= millis()-lt;
+  lt= millis();
+  minuto_atual+=(dt/1000.0)/60.0;
   if(modo == 1)
   {
     if((int(minuto_atual)-minuto_irrigar)%intervalo_irrigar==0)
@@ -121,7 +158,11 @@ void do_irrigation()
   {
     if(humidity<hum_min)
     {
-      //irrigar
+      digitalWrite(A_SOL, HIGH);
+    }
+    if(humidity>hum_max)
+    {
+      digitalWrite(A_SOL, LOW);
     }
   }
   else if(modo == 3)
@@ -133,11 +174,21 @@ void do_irrigation()
   }
   else if(modo == 4)
   {
-    
+    if(temperature>temp_max)
+    {
+      digitalWrite(A_SOL, HIGH);
+    }
+    if(temperature<temp_min)
+    {
+      digitalWrite(A_SOL, LOW);
+    }
   }
   else if(modo == 5)
   {
-    
+    if(temperature>temp_max)
+    {
+      //irrigar pelo tempo intervalo_irrigar
+    }
   }
   else if(modo == 6)
   {
@@ -147,8 +198,12 @@ void do_irrigation()
 
 void setup()
 {
-  pinMode(D1, OUTPUT);
-  digitalWrite(D1, HIGH);
+  pinMode(S_TEMP, OUTPUT);
+  pinMode(S_HUM, OUTPUT);
+  pinMode(A_SOL, OUTPUT);
+  digitalWrite(S_TEMP, LOW);
+  digitalWrite(S_HUM, LOW);
+  digitalWrite(A_SOL, LOW);
   
   Serial.begin(115200);
   delay(10);
@@ -210,7 +265,7 @@ void loop()
       double t1= 0;
       while(client.connected())
       {
-        if(millis()-t1>5000) // send sensors data
+        if(millis()-t1>1000) // send sensors data
         {
           get_sensors_data();
           // pack values into buffer
