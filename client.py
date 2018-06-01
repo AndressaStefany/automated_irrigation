@@ -110,14 +110,70 @@ class HttpServer(SimpleHTTPRequestHandler):
 
         f = self.send_head()
         if f:
-            aux= str(f.read(),'utf-8').strip('\'b')
-            to_format= []
-            for k,r in zip(postvars.keys(),postvars.values()):
-                to_format.append(str(k).strip('\'b'))
-                to_format.append(r)
-            to_format = to_format[::-1]
+            aux = str(f.read(),'utf-8').strip('\'b')
+            values = []
+            to_format = []
+            print(postvars.keys())
+            if b'modo' in postvars.keys():
+                aux_k = 'Modo'
+                values.append(aux_k)
+            if b'umi_min' in postvars.keys():
+                aux_k = 'Umidade mínima'
+                values.append(aux_k)
+            if b'umi_max' in postvars.keys():
+                aux_k = 'Umidade máxima'
+                values.append(aux_k)
+            if b'temp_min' in postvars.keys():
+                aux_k = 'Temperatura mínima'
+                values.append(aux_k)
+            if b'temp_max' in postvars.keys():
+                aux_k = 'Temperatura máxima'
+                values.append(aux_k)
+            if b'tempo' in postvars.keys():
+                aux_k = 'Horário'
+                values.append(aux_k)
+            if b'minutos' in postvars.keys():
+                aux_k = 'Intervalo em minutos'
+                values.append(aux_k)
+
+            html = '<table class=\"table\"><thead><tr>'
+
+            for value in values:
+                html += '<th scope=\"col\">'+str(value)+'</th>'
+
+            html += '</tr></thead><tbody><tr>'
+            values = []
+
+            if b'modo' in postvars.keys():
+                aux_v = postvars[b'modo']
+                values.append(aux_v)
+            if  b'umi_min' in postvars.keys():
+                aux_v = postvars[b'umi_min']
+                values.append(aux_v)
+            if b'umi_max' in postvars.keys():
+                aux_v = postvars[b'umi_max']
+                values.append(aux_v)
+            if b'temp_min' in postvars.keys():
+                aux_v = postvars[b'temp_min']
+                values.append(aux_v)
+            if b'temp_max' in postvars.keys():
+                aux_v = postvars[b'temp_max']
+                values.append(aux_v)
+            if b'tempo' in postvars.keys():
+                aux_v = postvars[b'tempo']
+                values.append(aux_v)
+            if b'minutos' in postvars.keys():
+                aux_v = postvars[b'minutos']
+                values.append(aux_v)
+
+            for value in values:
+                html += '<td>'+str(value)+'</td>'
+
+            html += '</tr></tbody></table>'
+            to_format.append(html)
+
             aux=aux.format(*to_format)
-            #print(aux.lstrip('\'b'))
+
             self.wfile.write(aux.encode('utf-8'))
             #self.copyfile(f, self.wfile)
             f.close()
