@@ -1,5 +1,6 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>        // Include the mDNS library
+#include "Adafruit_ADS1015.h"
 
 const char* ssid     = "Ramos";
 const char* password = "D_yP7xuC6";
@@ -9,16 +10,21 @@ const char* password = "D_yP7xuC6";
 
 WiFiServer server(5780);
 WiFiClient client;
+Adafruit_ADS1115 ads(0x48);
+
+#define SDA D1
+#define SCL D2
+#define ADC_16BIT_MAX 65536
+#define MAX_ADC 26318
+#define A_SOL D3
 
 char buff[10];
 float temperature= 0, humidity= 0;
+const float ads_bit_Voltage = (4.096*2)/(ADC_16BIT_MAX-1);
 int estado= LOW, max_delay= 0, len= 0;
-float minuto_atual;
+float minuto_atual, adc= 0;
 unsigned short modo, minuto_irrigar, intervalo_irrigar, temp_min, temp_max, hum_min, hum_max;
 
-#define S_HUM D1
-#define S_TEMP D2
-#define A_SOL D3
 
 void process_mode()
 {
@@ -99,38 +105,39 @@ void process_mode()
     buff[i]= 0;
 }
 
-float adc= 0;
-
 void get_sensors_data()
 {
-  digitalWrite(S_TEMP, HIGH);
-  digitalWrite(S_HUM, LOW);
-  delay(20);
   adc=0;
   for(int i=0; i<10; i++)
-    adc+= analogRead(A0);
+    adc+= ads.readADC_SingleEnded(2);
   adc/=10;
   
-  temperature= (float)adc/(1023.0-adc)*9860;
-  temperature= temperature/10000;
+  float vadc= adc*ads_bit_Voltage;
+  float i= (3.3-vadc)/9860.0;
+  //Serial.print("S1 : "); Serial.print(adc*ads_bit_Voltage);
+  //Serial.println("");
+  
+  //temperature = (float)adc/(MAX_ADC-adc)*9860;
+  temperature = vadc/i;
+  temperature = temperature/10000;
   temperature = log(temperature); // ln(R/Ro)
   temperature /= 3977;                   // 1/B * ln(R/Ro)
-  temperature += 1.0 / (25 + 273.15); // + (1/To)
-  temperature = 1.0 / temperature;                 // Inverte o valor
+  temperature += 1.0/(25 + 273.15); // + (1/To)
+  temperature = 1.0/temperature;                 // Inverte o valor
   temperature -= 273.15;                         // Converte para Celsius
 
-  digitalWrite(S_TEMP, LOW);
-  digitalWrite(S_HUM, HIGH);
-  delay(20);
   adc=0;
   for(int i=0; i<10; i++)
-    adc+= analogRead(A0);
+    adc+= ads.readADC_SingleEnded(3);
   adc/=10;
 
-  humidity= 10023.0/(float)adc;
+  vadc= adc*ads_bit_Voltage;
+  i= (3.3-vadc)/9860.0;
+  //Serial.println(vadc);
+  humidity= i/vadc*10E6; // micro condutancia
 
-  digitalWrite(S_TEMP, LOW);
-  digitalWrite(S_HUM, LOW);  
+  //Serial.print("S2 : "); Serial.print(adc*ads_bit_Voltage);
+  //Serial.println("");
   
   Serial.print("Temperatura ");
   Serial.print(temperature);
@@ -198,15 +205,14 @@ void do_irrigation()
 
 void setup()
 {
-  pinMode(S_TEMP, OUTPUT);
-  pinMode(S_HUM, OUTPUT);
   pinMode(A_SOL, OUTPUT);
-  digitalWrite(S_TEMP, LOW);
-  digitalWrite(S_HUM, LOW);
   digitalWrite(A_SOL, LOW);
   
   Serial.begin(115200);
   delay(10);
+  Wire.begin(SDA,SCL);
+  ads.setGain(GAIN_ONE);
+  ads.begin();
   
   Serial.println();
   Serial.println();
@@ -241,14 +247,19 @@ void setup()
   Serial.println("Server started");
 }
 
-
+double t1= 0;
 void loop()
 {
   client = server.available();
   if(!client)
   {
-    Serial.println("Waiting client");
     do_irrigation();
+    if(millis()-t1>1000) // send sensors data
+    {
+      Serial.println("Waiting client");
+      get_sensors_data();
+      t1= millis();
+    }
   }
   else
   {
@@ -262,7 +273,7 @@ void loop()
     {
       Serial.println("Available");
       client.setNoDelay(true);
-      double t1= 0;
+      t1= 0;
       while(client.connected())
       {
         if(millis()-t1>1000) // send sensors data
