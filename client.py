@@ -15,8 +15,10 @@ class Node:
         #self.sock= None
         self.connect_node()
         try:
-            self.t= Thread(target=self.recv_data)
-            self.t.start()
+            self.t1= Thread(target=self.recv_data)
+            self.t1.start()
+            self.t2 = Thread(target=self.reconnect)
+            self.t2.start()
         except:
             print('Error on creating recv thread')
 
@@ -33,17 +35,31 @@ class Node:
             print('Error on attempt to connect', e)
             self.connected = False
 
+    def reconnect(self):
+        while 1:
+            #print("Verificando conexao")
+            try:
+                data = b'ok'
+                self.sock.send(data)
+                self.connected = True
+            except:
+                print('Reconnecting...')
+                self.connected = False
+                self.sock.close()
+                self.connect_node()
+            time.sleep(5)
+
     def recv_data(self):
         while 1:
             try:
                 data = self.sock.recv(8)
+                print(data)
             except:
                 print('Connection lost recv')
                 self.connected= False
                 self.sock.close()
-                while not self.connected:
-                    self.connect_node()
-                    time.sleep(0.5)
+                time.sleep(5)
+                continue
             try:
                 sql = 'insert into sensors (temperature, humidity) values ({},{})'.format(struct.unpack('ff', data)[0],
                                                                                        struct.unpack('ff', data)[1])
