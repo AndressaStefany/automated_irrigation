@@ -32,6 +32,7 @@ void Irrigator::do_loop()
       get_sensors_data();
       t1= millis();
     }
+    delay(20);
   }
   else
   {
@@ -43,8 +44,6 @@ void Irrigator::do_loop()
     }
     if(max_delay < 500)
     {
-      //TODO Receber dados de modo anterior e tempo do rasp
-      
       if(verbose_mode) Serial.println("Available");
       client.setNoDelay(true);
       t1= 0;
@@ -240,7 +239,7 @@ void Irrigator::do_irrigation()
   {
     if(minuto_atual>minuto_irrigar && minuto_atual<minuto_irrigar+intervalo_irrigar)
     {
-	digitalWrite(SOL, HIGH);
+      digitalWrite(SOL, HIGH);
     }
     else digitalWrite(SOL, LOW);
   }
@@ -260,7 +259,7 @@ void Irrigator::do_irrigation()
     static bool m3= false;
     if(minuto_atual>minuto_irrigar && minuto_atual<minuto_irrigar+intervalo_irrigar)
     {
-       digitalWrite(SOL, HIGH);
+      digitalWrite(SOL, HIGH);
     }
     else
     {
@@ -298,11 +297,11 @@ void Irrigator::do_irrigation()
     }
     if(temperature>temp_max && !m5)
     {
-       m5= true;
-       minuto_irrigar= minuto_atual;
+      m5= true;
+      minuto_irrigar= minuto_atual;
     }
   }
   else if(modo == 6)
-  {  
+  {
   }
 }
