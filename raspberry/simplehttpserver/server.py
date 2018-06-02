@@ -2,17 +2,76 @@ from http.server import HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHan
 from cgi import parse_header, parse_multipart
 from urllib.parse import parse_qs
 import os
+import struct
+from array import array
 
 class Handler(SimpleHTTPRequestHandler):
     node= None
 
     def do_GET(self):
-        if('/index.html'):
-            print('html')
-            teste = self.node.get_data('cadastro', '*', 'data_cadastro = (select max(data_cadastro) from cadastro)')
-            print(teste)
+        if '/index.html' in self.path:
+            data_banco = self.node.get_data('cadastro', '*', 'data_cadastro = (select max(data_cadastro) from cadastro)')[0]
+            #datatime(year, month, day, hour, minute, second, microsecond)
 
-        SimpleHTTPRequestHandler.do_GET(self)
+            f = self.send_head()
+            if f:
+                aux= f.read()
+                aux= array('B',struct.unpack('B'*len(aux),aux))
+                #aux = str(f.read(), 'utf-8').strip('\'b')
+                #print(aux)
+
+                colunas = []
+                linha =[]
+
+                if data_banco[1] != None:
+                    colunas.append('Data de Cadastro')
+                    string = data_banco[1].strftime('%d %b,%Y %H:%M')
+                    linha.append(string)
+                if data_banco[8] != None:
+                    colunas.append('Intervalo de Irrigação')
+                    linha.append(data_banco[8])
+                if data_banco[3] != None:
+                    colunas.append('Umidade Mínima')
+                    linha.append(data_banco[3])
+                if data_banco[4] != None:
+                    colunas.append('Umidade Máxima')
+                    linha.append(data_banco[4])
+                if data_banco[5] != None:
+                    colunas.append('Temperatura Mínima')
+                    linha.append(data_banco[5])
+                if data_banco[6] != None:
+                    colunas.append('Temperatura Máxima')
+                    linha.append(data_banco[6])
+                if data_banco[7] != None:
+                    colunas.append('Modo')
+                    linha.append(data_banco[7])
+                if data_banco[2] != None:
+                    colunas.append('Horário de Irrigação')
+                    hora = int(data_banco[2]/60)
+                    minutos = data_banco[2]%60
+                    linha.append(str(hora) + ":" + str(minutos))
+
+                html = '<table class=\"table\"><thead><tr>'
+                for coluna in colunas:
+                    html += '<th scope=\"col\">' + str(coluna) + '</th>'
+                html += '</tr></thead><tbody><tr>'
+                for l in linha:
+                    html += '<td>'+str(l)+'</td>'
+                html += '</tr></tbody></table>'
+
+                html= html.encode('utf-8')
+                to_format= array('B',struct.unpack('B'*len(html),html))
+
+                idx = aux.index(123)
+                while idx < len(aux):
+                    if aux[idx+1]==123 and aux[idx+2]==125 and aux[idx+3]==125:
+                        aux= aux[:idx]+to_format+aux[idx+4:]
+                        break
+                    idx += aux[idx+1:].index(123)
+                #aux = aux.format(*to_format)
+                self.wfile.write(aux)
+        else:
+            SimpleHTTPRequestHandler.do_GET(self)
 
     def parse_POST(self):
         ctype, pdict = parse_header(self.headers['content-type'])
@@ -53,62 +112,73 @@ class Handler(SimpleHTTPRequestHandler):
         f = self.send_head()
         if f:
             aux = str(f.read(),'utf-8').strip('\'b')
-            values = []
+            values_table = []
             to_format = []
 
             if b'modo' in postvars.keys():
                 aux_k = 'Modo'
-                values.append(aux_k)
+                values_table.append(aux_k)
             if b'umi_min' in postvars.keys():
                 aux_k = 'Umidade mínima'
-                values.append(aux_k)
+                values_table.append(aux_k)
             if b'umi_max' in postvars.keys():
                 aux_k = 'Umidade máxima'
-                values.append(aux_k)
+                values_table.append(aux_k)
             if b'temp_min' in postvars.keys():
                 aux_k = 'Temperatura mínima'
-                values.append(aux_k)
+                values_table.append(aux_k)
             if b'temp_max' in postvars.keys():
                 aux_k = 'Temperatura máxima'
-                values.append(aux_k)
+                values_table.append(aux_k)
             if b'tempo' in postvars.keys():
                 aux_k = 'Horário'
-                values.append(aux_k)
+                values_table.append(aux_k)
             if b'minutos' in postvars.keys():
                 aux_k = 'Intervalo em minutos'
-                values.append(aux_k)
+                values_table.append(aux_k)
 
             html = '<table class=\"table\"><thead><tr>'
 
-            for value in values:
+            for value in values_table:
                 html += '<th scope=\"col\">'+str(value)+'</th>'
 
             html += '</tr></thead><tbody><tr>'
-            values = []
+            values_table = []
+            values_save = []
 
             if b'modo' in postvars.keys():
                 aux_v = postvars[b'modo']
-                values.append(aux_v)
+                values_table.append(aux_v)
+                values_save.append(aux_v)
             if  b'umi_min' in postvars.keys():
                 aux_v = postvars[b'umi_min']
-                values.append(aux_v)
+                values_table.append(aux_v)
+                values_save.append(aux_v)
             if b'umi_max' in postvars.keys():
                 aux_v = postvars[b'umi_max']
-                values.append(aux_v)
+                values_table.append(aux_v)
+                values_save.append(aux_v)
             if b'temp_min' in postvars.keys():
                 aux_v = postvars[b'temp_min']
-                values.append(aux_v)
+                values_table.append(aux_v)
+                values_save.append(aux_v)
             if b'temp_max' in postvars.keys():
                 aux_v = postvars[b'temp_max']
-                values.append(aux_v)
+                values_table.append(aux_v)
+                values_save.append(aux_v)
             if b'tempo' in postvars.keys():
                 aux_v = postvars[b'tempo']
-                values.append(aux_v)
+                values_save.append(aux_v)
+                hora = int(aux_v/60)
+                minutos = aux_v%60
+                aux_v = str(hora)+":"+str(minutos)
+                values_table.append(aux_v)
             if b'minutos' in postvars.keys():
                 aux_v = postvars[b'minutos']
-                values.append(aux_v)
+                values_table.append(aux_v)
+                values_save.append(aux_v)
 
-            for value in values:
+            for value in values_table:
                 html += '<td>'+str(value)+'</td>'
 
             html += '</tr></tbody></table>'
@@ -135,7 +205,7 @@ class Handler(SimpleHTTPRequestHandler):
             if b'tempo' in postvars.keys():
                 keys.append('tempo')
 
-            self.node.save_data('cadastro', keys, values)
+            self.node.save_data('cadastro', keys, values_save)
 
             f.close()
 
