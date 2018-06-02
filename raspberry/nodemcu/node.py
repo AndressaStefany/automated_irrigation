@@ -8,8 +8,8 @@ class Node:
         self.server_adddress = ('192.168.0.111', 5780)
         self.connected= False
         #self.sock= None
+        self.con = db
         self.connect_node()
-        self.con= db
         try:
             self.t1= Thread(target=self.recv_data)
             self.t1.start()
@@ -24,12 +24,36 @@ class Node:
             # Create a TCP/IP socket
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect(self.server_adddress)
+
             self.sock.send(b'ok')
             self.connected= True
             print('Successfully connected')
         except socket.error as e:
             print('Error on attempt to connect', e)
             self.connected = False
+
+        self.send_last_mode()
+
+    def send_last_mode(self):
+        last_r = self.get_data('cadastro', '*', 'data_cadastro = (select max(data_cadastro) from cadastro)')[0]
+        pars = {'id': 0, 'data_cadastro': 1, 'minutos': 2, 'umi_min': 3, 'umi_max': 4, 'temp_min': 5, 'temp_max': 6,
+                'modo': 7, 'tempo': 8}
+        modo = []
+        if last_r[pars['modo']] == 1:
+            modo = [last_r[pars['modo']], last_r[pars['tempo']], last_r[pars['minutos']]]
+        if last_r[pars['modo']] == 2:
+            modo = [last_r[pars['modo']], last_r[pars['umi_min']], last_r[pars['umi_max']]]
+        if last_r[pars['modo']] == 3:
+            modo = [last_r[pars['modo']], last_r[pars['umi_min']], last_r[pars['minutos']]]
+        if last_r[pars['modo']] == 4:
+            modo = [last_r[pars['modo']], last_r[pars['temp_min']], last_r[pars['temp_max']]]
+        if last_r[pars['modo']] == 5:
+            modo = [last_r[pars['modo']], last_r[pars['temp_max']], last_r[pars['minutos']]]
+        if last_r[pars['modo']] == 6:
+            modo = [last_r[pars['modo']], last_r[pars['temp_min']], last_r[pars['temp_max']], last_r[pars['umi_min']],
+                    last_r[pars['umi_max']]]
+
+        self.send_data(modo)
 
     def reconnect(self):
         while 1:
@@ -55,17 +79,13 @@ class Node:
                 self.sock.close()
                 time.sleep(5)
                 continue
-            try:
-                sql = 'insert into sensors (temperature, humidity) values ({},{})'.format(struct.unpack('ff', data)[0],
-                                                                                       struct.unpack('ff', data)[1])
-                self.con.cursor().execute(sql)
-                self.con.commit()
-            except:
-                print('Error on saving on database {}'.format(data))
+            self.save_data('sensors', ['temperature','humidity'], struct.unpack('ff', data))
 
     def send_data(self, modo):
         if self.connected:
             try:
+                print("Enviando modo", modo)
+                modo= [int(x) for x in modo]
                 data = struct.pack("<B"+"H"*(len(modo)-1), *modo)
                 self.sock.send(data)
             except:
@@ -73,39 +93,24 @@ class Node:
                 self.connected = False
                 self.sock.close()
 
-    def save_data(self, data):
-        keys = 'modo'
-        if b'umi_min' in data.keys():
-            keys +=',umi_min'
-        if b'umi_max' in data.keys():
-            keys += ',umi_max'
-        if b'temp_min' in data.keys():
-            keys += ',temp_min'
-        if b'temp_max' in data.keys():
-            keys += ',temp_max'
-        if b'minutos' in data.keys():
-            keys += ',minutos'
-        if b'tempo' in data.keys():
-            keys += ',tempo'
-
-        val = str(data[b'modo'])
-        if b'umi_min' in data.keys():
-            val += ','+str(data[b'umi_min'])
-        if b'umi_max' in data.keys():
-            val += ','+str(data[b'umi_max'])
-        if b'temp_min' in data.keys():
-            val += ','+str(data[b'temp_min'])
-        if b'temp_max' in data.keys():
-            val += ','+str(data[b'temp_max'])
-        if b'minutos' in data.keys():
-            val += ','+str(data[b'minutos'])
-        if b'tempo' in data.keys():
-            val += ','+str(data[b'tempo'])
-
+    def get_data(self, table, cols, where):
         try:
-            sql = 'insert into cadastro ('+keys+') values ('+val+')'
-            print(sql)
+            sql= 'select {} from {} where {}'.format(cols,table,where)
+            cur= self.con.cursor()
+            cur.execute(sql)
+            return cur.fetchall()
+        except:
+            print("Error on geting data ")
+
+    def save_data(self, table, keys, val):
+        try:
+            keys_= ''
+            val_= ''
+            for k,v in zip(keys,val):
+                keys_+=k+(',' if k != keys[-1] else '')
+                val_+=str(v)+(',' if k != keys[-1] else '')
+            sql = 'insert into {} ({}) values ({})'.format(table,keys_,val_)
             self.con.cursor().execute(sql)
             self.con.commit()
         except:
-            print('Error on saving on database in table cadastro')
+            print('Error on saving on database in table {}'.format(table))

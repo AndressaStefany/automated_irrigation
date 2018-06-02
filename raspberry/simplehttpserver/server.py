@@ -7,6 +7,10 @@ class Handler(SimpleHTTPRequestHandler):
     node= None
 
     def do_GET(self):
+        print("Aquiiiiiii")
+        print(self.path)
+        #if(...)
+        #    get_data('cadastro', '*', '')
         SimpleHTTPRequestHandler.do_GET(self)
 
     def parse_POST(self):
@@ -21,10 +25,6 @@ class Handler(SimpleHTTPRequestHandler):
         return postvars
 
     def do_POST(self):
-        # Mod2 and/or Mod4
-        # 0 - or; 1 - and
-        Modo_6 = [6, 1]
-
         postvars = self.parse_POST()
         for k,r in zip(postvars.keys(),postvars.values()):
             if b'tempo' in k:
@@ -48,7 +48,6 @@ class Handler(SimpleHTTPRequestHandler):
         if postvars[b'modo'] == 6:
             modo= [postvars[b'modo'], postvars[b'temp_min'], postvars[b'temp_max'], postvars[b'umi_min'], postvars[b'umi_max']]
         self.node.send_data(modo)
-        self.node.save_data(postvars)
 
         f = self.send_head()
         if f:
@@ -118,6 +117,25 @@ class Handler(SimpleHTTPRequestHandler):
 
             self.wfile.write(aux.encode('utf-8'))
             #self.copyfile(f, self.wfile)
+
+            keys = []
+            if b'modo' in postvars.keys():
+                keys.append('modo')
+            if b'umi_min' in postvars.keys():
+                keys.append('umi_min')
+            if b'umi_max' in postvars.keys():
+                keys.append('umi_max')
+            if b'temp_min' in postvars.keys():
+                keys.append('temp_min')
+            if b'temp_max' in postvars.keys():
+                keys.append('temp_max')
+            if b'minutos' in postvars.keys():
+                keys.append('minutos')
+            if b'tempo' in postvars.keys():
+                keys.append('tempo')
+
+            self.node.save_data('cadastro', keys, values)
+
             f.close()
 
 class Server():
