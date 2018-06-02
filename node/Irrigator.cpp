@@ -44,6 +44,7 @@ void Irrigator::do_loop()
     if(max_delay < 500)
     {
       //TODO Receber dados de modo anterior e tempo do rasp
+      
       if(verbose_mode) Serial.println("Available");
       client.setNoDelay(true);
       t1= 0;
@@ -67,17 +68,29 @@ void Irrigator::do_loop()
         do_irrigation();
         delay(20);
       }
+      client.flush();
     }
   }
 }
 
 void Irrigator::process_mode()
 {
-  //Serial.print("Tamanho: ");
-  //Serial.println(len);
   if(buff[0] == 'o' && buff[1] == 'k')
     return;
-  if(verbose_mode) Serial.println(modo);
+  if(buff[0] == 127)
+  {
+    unsigned short aux;
+    memcpy(&aux,&buff[1],2);
+    minuto_atual= aux;
+    if(verbose_mode)
+    {
+      Serial.print("Sync time ");
+      Serial.println(minuto_atual);
+    }
+    return;
+  }
+  //Serial.print("Tamanho: ");
+  //Serial.println(len);
   modo= buff[0];
   if(modo == 1)
   {
@@ -204,6 +217,7 @@ void Irrigator::get_sensors_data()
 
   //Serial.print("S2 : "); Serial.print(adc*ads_bit_Voltage);
   //Serial.println("");
+
 
   if(verbose_mode)
   {

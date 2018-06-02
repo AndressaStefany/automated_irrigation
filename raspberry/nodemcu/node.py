@@ -2,6 +2,7 @@ import socket
 import struct
 import time
 from threading import Thread
+from datetime import datetime
 
 class Node:
     def __init__(self, db):
@@ -53,7 +54,14 @@ class Node:
             modo = [last_r[pars['modo']], last_r[pars['temp_min']], last_r[pars['temp_max']], last_r[pars['umi_min']],
                     last_r[pars['umi_max']]]
 
-        self.send_data(modo)
+
+        # wait for the nodemcu
+        time.sleep(1)
+        for i in range(0,10):
+            self.send_data(modo)
+            minute= datetime.now()
+            self.send_data([127, minute.hour*60+minute.minute, 0])
+            time.sleep(0.1)
 
     def reconnect(self):
         while 1:
@@ -84,9 +92,8 @@ class Node:
     def send_data(self, modo):
         if self.connected:
             try:
-                print("Enviando modo", modo)
-                modo= [int(x) for x in modo]
-                data = struct.pack("<B"+"H"*(len(modo)-1), *modo)
+                modo_= [int(x) for x in modo]
+                data = struct.pack("<B"+"H"*(len(modo)-1), *modo_)
                 self.sock.send(data)
             except:
                 print('Connection lost -- send')

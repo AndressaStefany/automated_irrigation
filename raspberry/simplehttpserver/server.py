@@ -7,10 +7,11 @@ class Handler(SimpleHTTPRequestHandler):
     node= None
 
     def do_GET(self):
-        print("Aquiiiiiii")
-        print(self.path)
-        #if(...)
-        #    get_data('cadastro', '*', '')
+        if('/index.html'):
+            print('html')
+            teste = self.node.get_data('cadastro', '*', 'data_cadastro = (select max(data_cadastro) from cadastro)')
+            print(teste)
+
         SimpleHTTPRequestHandler.do_GET(self)
 
     def parse_POST(self):
