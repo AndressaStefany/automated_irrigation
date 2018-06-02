@@ -238,10 +238,11 @@ void Irrigator::do_irrigation()
   minuto_atual+=(dt/1000.0)/60.0;
   if(modo == 1)
   {
-    if((int(minuto_atual)-minuto_irrigar)%intervalo_irrigar==0)
+    if(minuto_atual>minuto_irrigar && minuto_atual<minuto_irrigar+intervalo_irrigar)
     {
-      //irrigar
+	digitalWrite(SOL, HIGH);
     }
+    else digitalWrite(SOL, LOW);
   }
   else if(modo == 2)
   {
@@ -256,9 +257,20 @@ void Irrigator::do_irrigation()
   }
   else if(modo == 3)
   {
-    if(humidity<hum_min)
+    static bool m3= false;
+    if(minuto_atual>minuto_irrigar && minuto_atual<minuto_irrigar+intervalo_irrigar)
     {
-      //irrigar pelo tempo intervalo_irrigar
+       digitalWrite(SOL, HIGH);
+    }
+    else
+    {
+      digitalWrite(SOL, LOW);
+      m3= false;
+    }
+    if(humidity<hum_min && !m3)
+    {
+       m3= true;
+       minuto_irrigar= minuto_atual;
     }
   }
   else if(modo == 4)
@@ -274,13 +286,23 @@ void Irrigator::do_irrigation()
   }
   else if(modo == 5)
   {
-    if(temperature>temp_max)
+    static bool m5= false;
+    if(minuto_atual>minuto_irrigar && minuto_atual<minuto_irrigar+intervalo_irrigar)
     {
-      //irrigar pelo tempo intervalo_irrigar
+       digitalWrite(SOL, HIGH);
+    }
+    else
+    {
+      digitalWrite(SOL, LOW);
+      m5= false;
+    }
+    if(temperature>temp_max && !m5)
+    {
+       m5= true;
+       minuto_irrigar= minuto_atual;
     }
   }
   else if(modo == 6)
-  {
-    
+  {  
   }
 }
