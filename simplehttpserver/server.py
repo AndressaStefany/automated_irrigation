@@ -33,7 +33,6 @@ class Handler(SimpleHTTPRequestHandler):
             else:
                 postvars[k] = int(r[0])
 
-        print(postvars)
 
         modo= []
         if postvars[b'modo'] == 1:
@@ -49,13 +48,14 @@ class Handler(SimpleHTTPRequestHandler):
         if postvars[b'modo'] == 6:
             modo= [postvars[b'modo'], postvars[b'temp_min'], postvars[b'temp_max'], postvars[b'umi_min'], postvars[b'umi_max']]
         self.node.send_data(modo)
+        self.node.save_data(postvars)
 
         f = self.send_head()
         if f:
             aux = str(f.read(),'utf-8').strip('\'b')
             values = []
             to_format = []
-            print(postvars.keys())
+
             if b'modo' in postvars.keys():
                 aux_k = 'Modo'
                 values.append(aux_k)

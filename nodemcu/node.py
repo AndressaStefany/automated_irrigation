@@ -72,3 +72,40 @@ class Node:
                 print('Connection lost -- send')
                 self.connected = False
                 self.sock.close()
+
+    def save_data(self, data):
+        keys = 'modo'
+        if b'umi_min' in data.keys():
+            keys +=',umi_min'
+        if b'umi_max' in data.keys():
+            keys += ',umi_max'
+        if b'temp_min' in data.keys():
+            keys += ',temp_min'
+        if b'temp_max' in data.keys():
+            keys += ',temp_max'
+        if b'minutos' in data.keys():
+            keys += ',minutos'
+        if b'tempo' in data.keys():
+            keys += ',tempo'
+
+        val = str(data[b'modo'])
+        if b'umi_min' in data.keys():
+            val += ','+str(data[b'umi_min'])
+        if b'umi_max' in data.keys():
+            val += ','+str(data[b'umi_max'])
+        if b'temp_min' in data.keys():
+            val += ','+str(data[b'temp_min'])
+        if b'temp_max' in data.keys():
+            val += ','+str(data[b'temp_max'])
+        if b'minutos' in data.keys():
+            val += ','+str(data[b'minutos'])
+        if b'tempo' in data.keys():
+            val += ','+str(data[b'tempo'])
+
+        try:
+            sql = 'insert into cadastro ('+keys+') values ('+val+')'
+            print(sql)
+            self.con.cursor().execute(sql)
+            self.con.commit()
+        except:
+            print('Error on saving on database in table cadastro')
