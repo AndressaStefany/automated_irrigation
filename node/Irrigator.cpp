@@ -43,7 +43,7 @@ void Irrigator::do_loop()
       max_delay++;
     }
     if(max_delay < 500)
-    {
+    { 
       if(verbose_mode) Serial.println("Available");
       client.setNoDelay(true);
       t1= 0;
@@ -80,7 +80,8 @@ void Irrigator::process_mode()
   {
     unsigned short aux;
     memcpy(&aux,&buff[1],2);
-    minuto_atual= aux;
+    sync_min= aux/10.0-fmod(millis()/60000.0,1440);
+    //minuto_atual= aux/10.0;
     if(verbose_mode)
     {
       Serial.print("Sync time ");
@@ -103,6 +104,7 @@ void Irrigator::process_mode()
       Serial.print(" ");
       Serial.print(intervalo_irrigar);
     }
+    digitalWrite(SOL, LOW);
   }
   else if(modo == 2)
   {
@@ -116,6 +118,7 @@ void Irrigator::process_mode()
       Serial.print(" ");
       Serial.print(hum_max);
     }
+    digitalWrite(SOL, LOW);
   }
   else if(modo == 3)
   {
@@ -129,6 +132,7 @@ void Irrigator::process_mode()
       Serial.print(" ");
       Serial.print(hum_max); 
     }
+    digitalWrite(SOL, LOW);
   }
   else if(modo == 4)
   {
@@ -142,6 +146,7 @@ void Irrigator::process_mode()
       Serial.print(" ");
       Serial.print(temp_max);
     }
+    digitalWrite(SOL, LOW);
   }
   else if(modo == 5)
   {
@@ -155,6 +160,7 @@ void Irrigator::process_mode()
       Serial.print(" ");
       Serial.print(intervalo_irrigar); 
     }
+    digitalWrite(SOL, LOW);
   }
   else if(modo == 6)
   {
@@ -176,13 +182,14 @@ void Irrigator::process_mode()
       Serial.print(" ");
       Serial.print(hum_max); 
     }
+    digitalWrite(SOL, LOW);
   }
   if(verbose_mode) Serial.println("");
   client.flush();
   for(int i=0; i<10; i++)
     buff[i]= 0;
 }
-
+#define MAX_ADC 26318
 void Irrigator::get_sensors_data()
 {
   adc=0;
@@ -195,8 +202,8 @@ void Irrigator::get_sensors_data()
   //Serial.print("S1 : "); Serial.print(adc*ads_bit_Voltage);
   //Serial.println("");
   
-  //temperature = (float)adc/(MAX_ADC-adc)*9860;
-  temperature = vadc/i;
+  temperature = (float)adc/(MAX_ADC-adc)*9860;
+  //temperature = vadc/i;
   temperature = temperature/10000;
   temperature = log(temperature); // ln(R/Ro)
   temperature /= 3977;                   // 1/B * ln(R/Ro)
@@ -212,7 +219,8 @@ void Irrigator::get_sensors_data()
   vadc= adc*ads_bit_Voltage;
   i= (3.3-vadc)/9860.0;
   //Serial.println(vadc);
-  humidity= i/vadc*10E6; // micro condutancia
+  //humidity= i/vadc*10E6; // micro condutancia
+  humidity = (MAX_ADC-adc)/(float)adc*1000;
 
   //Serial.print("S2 : "); Serial.print(adc*ads_bit_Voltage);
   //Serial.println("");
@@ -226,15 +234,24 @@ void Irrigator::get_sensors_data()
     Serial.println(humidity);
   
     Serial.print("Tempo agora : ");
-    Serial.println(minuto_atual); 
+    Serial.print(minuto_atual);
+    Serial.print(" -- ");
+    
+    Serial.print(int(minuto_atual/60));
+    Serial.print(":");
+    Serial.print(int(fmod(minuto_atual,60))); 
+    Serial.print(":");
+    Serial.print((minuto_atual-int(minuto_atual))*60 ); 
+    Serial.println("");
   }
 }
 
 void Irrigator::do_irrigation()
 {
-  dt= millis()-lt;
-  lt= millis();
-  minuto_atual+=(dt/1000.0)/60.0;
+  //dt= millis()-lt;
+  //lt= millis();
+  //minuto_atual+=(dt/1000.0)/60.0;
+  minuto_atual= fmod(millis()/60000.0,1440)+sync_min;
   if(modo == 1)
   {
     if(minuto_atual>minuto_irrigar && minuto_atual<minuto_irrigar+intervalo_irrigar)

@@ -13,7 +13,7 @@ class Irrigator
   unsigned short modo, minuto_irrigar, intervalo_irrigar, temp_min, temp_max, hum_min, hum_max;
   const int SOL;
   int estado= LOW, max_delay= 0, len= 0;
-  float minuto_atual= 0, adc= 0;
+  float minuto_atual= 0, adc= 0, sync_min= 0;
 
   // Communication
   WiFiServer server;

@@ -12,15 +12,18 @@ const char* password = "D_yP7xuC6";
 
 #define SDA D1
 #define SCL D2
-#define A_SOL D3
+#define A_SOL D6
 #define PORT 5780
-#define MAX_ADC 26318
 
 Irrigator node1(PORT, SDA, SCL, A_SOL);
 
 void setup()
 {
   pinMode(D0,OUTPUT);
+  pinMode(D4,OUTPUT);
+  pinMode(D3,OUTPUT);
+  digitalWrite(D4,HIGH);
+  digitalWrite(D3,LOW);
   digitalWrite(D0,LOW);
   node1.init(1);
   
