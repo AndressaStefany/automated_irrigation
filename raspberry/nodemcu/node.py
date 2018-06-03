@@ -56,11 +56,11 @@ class Node:
 
 
         # wait for the nodemcu
-        time.sleep(1)
-        for i in range(0,10):
+        time.sleep(0.5)
+        for i in range(0,4):
             self.send_data(modo)
             minute= datetime.now()
-            self.send_data([127, minute.hour*60+minute.minute, 0])
+            self.send_data([127, (minute.hour*60+minute.minute)*10+minute.second/6.0, 0])
             time.sleep(0.1)
 
     def reconnect(self):
