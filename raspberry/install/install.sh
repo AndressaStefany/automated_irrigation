@@ -4,7 +4,8 @@ sudo apt-get install python3-psycopg2
 sudo apt-get install postgresql
 
 #sudo nano /etc/grafana/grafana.ini Ativar acesso anonimo
-sudo service grafana-server start
+sudo service postgresql start
 sudo -u postgres createdb nodemcu
-# criar tabelas 
-
+sudo -u postgres psql -d nodemcu -a -f create_tables.sql
+sudo service grafana-server start
+python3 create_dashboard.py
