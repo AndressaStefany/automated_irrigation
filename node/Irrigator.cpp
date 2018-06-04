@@ -1,4 +1,3 @@
-
 #include "Arduino.h"
 #include "Irrigator.h"
 
@@ -60,18 +59,9 @@ void Irrigator::do_loop()
           elapsed_time= millis();
         }
         len= client.read((uint8_t*)&buff[0], 5);
-        if(len==5) // process received data
+        if(len>0) // process received data
         {
           process_mode();
-        }
-        else
-        {
-          if(verbose_mode)
-          {
-            Serial.println("Bad formad packge");
-            for(i=0; i<len; i++)
-              Serial.println(int(buff[i])); 
-          }
         }
         do_irrigation();
         delay(20);
@@ -189,6 +179,15 @@ void Irrigator::process_mode()
       Serial.print(hum_max); 
     }
     digitalWrite(SOL, LOW);
+  }
+  else
+  {
+    if(verbose_mode)
+    {
+      Serial.println("Bad formad packge");
+      for(i=0; i<len; i++)
+        Serial.println(int(buff[i])); 
+    }
   }
   if(verbose_mode) Serial.println("");
   client.flush();

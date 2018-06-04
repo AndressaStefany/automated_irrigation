@@ -2,6 +2,12 @@ from nodemcu import node
 from simplehttpserver import server
 import psycopg2
 
+import os
+
+desired_output_file = open('log', 'a')
+os.dup2(desired_output_file.fileno(), 1)
+os.dup2(desired_output_file.fileno(), 2)
+
 try:
     print('Starting PostgreSQL connection')
     con = psycopg2.connect(host='localhost', database='nodemcu', user='postgres', password='admin')
