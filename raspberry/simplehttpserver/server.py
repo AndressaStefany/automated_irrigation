@@ -8,12 +8,43 @@ from array import array
 class Handler(SimpleHTTPRequestHandler):
     node= None
 
+    def send_head_custom(self):
+        path = self.translate_path(self.path)
+        f = None
+        if os.path.isdir(path):
+            if not self.path.endswith('/'):
+                # redirect browser - doing basically what apache does
+                self.send_response(301)
+                self.send_header("Location", self.path + "/")
+                self.end_headers()
+                return None
+            for index in "index.html", "index.htm":
+                index = os.path.join(path, index)
+                if os.path.exists(index):
+                    path = index
+                    break
+            else:
+                return self.list_directory(path)
+        ctype = self.guess_type(path)
+        try:
+            f = open(path, 'rb')
+        except IOError:
+            self.send_error(404, "File not found")
+            return None
+        self.send_response(200)
+        self.send_header("Content-type", ctype)
+        fs = os.fstat(f.fileno())
+        #self.send_header("Content-Length", str(fs[6]))
+        self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
+        #self.end_headers()
+        return f
+
     def do_GET(self):
         if ('/index.html' in self.path) or (self.path == '/' in self.path):
             data_banco = self.node.get_data('cadastro', '*', 'data_cadastro = (select max(data_cadastro) from cadastro)')[0]
             #datatime(year, month, day, hour, minute, second, microsecond)
 
-            f = self.send_head()
+            f = self.send_head_custom()
             if f:
                 aux= f.read()
                 aux= array('B',struct.unpack('B'*len(aux),aux))
@@ -80,7 +111,10 @@ class Handler(SimpleHTTPRequestHandler):
                         break
                     idx += aux[idx+1:].index(123)
                 #aux = aux.format(*to_format)
+                self.send_header("Content-Length", len(aux))
+                self.end_headers()
                 self.wfile.write(aux)
+                f.close()
         else:
             SimpleHTTPRequestHandler.do_GET(self)
 
@@ -120,7 +154,7 @@ class Handler(SimpleHTTPRequestHandler):
             modo= [postvars[b'modo'], postvars[b'temp_min'], postvars[b'temp_max'], postvars[b'umi_min'], postvars[b'umi_max']]
         self.node.send_data(modo)
 
-        f = self.send_head()
+        f = self.send_head_custom()
         if f:
             aux = str(f.read(),'utf-8').strip('\'b')
             keys_table = []
@@ -200,6 +234,8 @@ class Handler(SimpleHTTPRequestHandler):
 
             aux=aux.format(*to_format)
 
+            self.send_header("Content-Length", len(aux.encode('utf-8')))
+            self.end_headers()
             self.wfile.write(aux.encode('utf-8'))
             #self.copyfile(f, self.wfile)
 
