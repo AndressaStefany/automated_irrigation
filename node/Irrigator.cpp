@@ -1,3 +1,4 @@
+
 #include "Arduino.h"
 #include "Irrigator.h"
 
@@ -9,6 +10,13 @@ void Irrigator::init(int v)
     
   pinMode(SOL, OUTPUT);
   digitalWrite(SOL, LOW);
+
+  pinMode(led_irrigar,OUTPUT);
+  pinMode(led_info,OUTPUT);
+  pinMode(led_con,OUTPUT);
+  digitalWrite(led_irrigar,LOW);
+  digitalWrite(led_info,LOW);
+  digitalWrite(led_con,LOW);
   
   Wire.begin(SDA,SCL);
   ads.setGain(GAIN_ONE);
@@ -31,6 +39,7 @@ void Irrigator::do_loop()
       get_sensors_data();
       elapsed_time= millis();
     }
+    digitalWrite(led_con,LOW);
     delay(20);
   }
   else
@@ -40,6 +49,7 @@ void Irrigator::do_loop()
     while(!client.available() && max_delay<=max_wait_client){
       delay(1);
       max_delay++;
+      digitalWrite(led_con,max_delay%2);
     }
     if(max_delay < max_wait_client)
     {
@@ -50,6 +60,7 @@ void Irrigator::do_loop()
       {
         if(millis()-elapsed_time>sensor_interval) // send sensors data
         {
+          digitalWrite(led_info,HIGH);
           get_sensors_data();
           // pack values into buffer
           memcpy(&buff[0], &temperature, 4);
@@ -57,13 +68,17 @@ void Irrigator::do_loop()
           client.write((uint8_t*)&buff[0], 8);
           client.flush();
           elapsed_time= millis();
+          digitalWrite(led_info,LOW);
         }
         len= client.read((uint8_t*)&buff[0], 5);
         if(len>0) // process received data
         {
+          digitalWrite(led_info,HIGH);
           process_mode();
+          digitalWrite(led_info,LOW);
         }
         do_irrigation();
+        digitalWrite(led_con,HIGH);
         delay(20);
       }
       client.flush();
@@ -119,14 +134,14 @@ void Irrigator::process_mode()
   else if(modo == 3)
   {
     memcpy(&hum_min,&buff[1],2);
-    memcpy(&hum_max,&buff[3],2);
+    memcpy(&intervalo_irrigar,&buff[3],2);
 
     if(verbose_mode)
     {
       Serial.println("Modo 3");
       Serial.print(hum_min);
       Serial.print(" ");
-      Serial.print(hum_max); 
+      Serial.print(intervalo_irrigar);
     }
     digitalWrite(SOL, LOW);
   }
@@ -237,7 +252,7 @@ void Irrigator::get_sensors_data()
     Serial.print(temperature);
     Serial.print(" Umidade ");
     Serial.println(humidity);
-  
+    
     Serial.print("Tempo agora : ");
     Serial.print(minuto_atual);
     Serial.print(" -- ");
@@ -256,33 +271,41 @@ void Irrigator::do_irrigation()
   minuto_atual= fmod(millis()/60000.0,1440)+sync_min;
   if(modo == 1)
   {
-    if(minuto_atual>minuto_irrigar && minuto_atual<minuto_irrigar+intervalo_irrigar)
+    if(minuto_atual>=minuto_irrigar && minuto_atual<minuto_irrigar+intervalo_irrigar)
     {
-      digitalWrite(SOL, HIGH);
+      digitalWrite(SOL, LOW); // inverse
+      digitalWrite(led_irrigar,HIGH);
     }
-    else digitalWrite(SOL, LOW);
+    else
+    {
+      digitalWrite(SOL, HIGH); // inverse 
+      digitalWrite(led_irrigar,LOW);
+    }
   }
   else if(modo == 2)
   {
     if(humidity<hum_min)
     {
-      digitalWrite(SOL, HIGH);
+      digitalWrite(SOL, LOW); // inverse 
+      digitalWrite(led_irrigar,HIGH);
     }
     if(humidity>hum_max)
     {
-      digitalWrite(SOL, LOW);
+      digitalWrite(SOL, HIGH); // inverse 
+      digitalWrite(led_irrigar,LOW);
     }
   }
   else if(modo == 3)
   {
-    static bool m3= false;
-    if(minuto_atual>minuto_irrigar && minuto_atual<minuto_irrigar+intervalo_irrigar)
+    if(minuto_atual>=minuto_irrigar && minuto_atual<(minuto_irrigar+intervalo_irrigar))
     {
-      digitalWrite(SOL, HIGH);
+      digitalWrite(SOL, LOW); // inverse 
+      digitalWrite(led_irrigar,HIGH);
     }
     else
     {
-      digitalWrite(SOL, LOW);
+      digitalWrite(SOL, HIGH); // inverse 
+      digitalWrite(led_irrigar,LOW);
       m3= false;
     }
     if(humidity<hum_min && !m3)
@@ -295,23 +318,26 @@ void Irrigator::do_irrigation()
   {
     if(temperature>temp_max)
     {
-      digitalWrite(SOL, HIGH);
+      digitalWrite(SOL, LOW); // inverse 
+      digitalWrite(led_irrigar,HIGH);
     }
     if(temperature<temp_min)
     {
-      digitalWrite(SOL, LOW);
+      digitalWrite(SOL, HIGH); // inverse 
+      digitalWrite(led_irrigar,LOW);
     }
   }
   else if(modo == 5)
   {
-    static bool m5= false;
-    if(minuto_atual>minuto_irrigar && minuto_atual<minuto_irrigar+intervalo_irrigar)
+    if(minuto_atual>=minuto_irrigar && minuto_atual<minuto_irrigar+intervalo_irrigar)
     {
-       digitalWrite(SOL, HIGH);
+       digitalWrite(SOL, LOW); // inverse 
+      digitalWrite(led_irrigar,HIGH);
     }
     else
     {
-      digitalWrite(SOL, LOW);
+      digitalWrite(SOL, HIGH); // inverse 
+      digitalWrite(led_irrigar,LOW);
       m5= false;
     }
     if(temperature>temp_max && !m5)

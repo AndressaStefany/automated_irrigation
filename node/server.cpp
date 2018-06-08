@@ -12,20 +12,27 @@ const char* password = "D_yP7xuC6";
 
 #define SDA D1
 #define SCL D2
-#define A_SOL D6
+#define A_SOL D5
+
+#define LED_IRRIGAR D6
+#define LED_INFO D7
+#define LED_CON D8
+
 #define PORT 5780
 
-Irrigator node1(PORT, SDA, SCL, A_SOL);
+Irrigator node1(PORT, SDA, SCL, A_SOL, LED_CON, LED_INFO, LED_IRRIGAR);
 
 void setup()
 {
   pinMode(D0,OUTPUT);
-  pinMode(D4,OUTPUT);
   pinMode(D3,OUTPUT);
-  digitalWrite(D4,HIGH);
-  digitalWrite(D3,LOW);
+  pinMode(D4,OUTPUT);
+  
   digitalWrite(D0,LOW);
-  node1.init(1);
+  digitalWrite(D3,LOW);
+  digitalWrite(D4,HIGH);
+  
+  node1.init(2);
   
   Serial.println();
   Serial.println();

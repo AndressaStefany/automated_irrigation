@@ -29,8 +29,13 @@ class Irrigator
 
   int verbose_mode= 1;
   int i= 0;
+  bool m3= false, m5= false;
+  
+  // LEDS
+  const short led_con, led_info, led_irrigar;
 public:
-  Irrigator(int port, int sda, int scl, int sol) : server(port), ads(0x48), SDA(sda), SCL(scl), SOL(sol) {}
+  Irrigator(int port, int sda, int scl, int sol, short led_con_, short led_info_, short led_irrigar_) : server(port), ads(0x48), SDA(sda), SCL(scl), SOL(sol), 
+  led_con(led_con_), led_info(led_info_), led_irrigar(led_irrigar_) {}
   void init(int v);
   void process_mode();
   void get_sensors_data();
