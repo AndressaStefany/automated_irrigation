@@ -269,7 +269,7 @@
           "alias": "",
           "format": "table",
           "hide": false,
-          "rawSql": "SELECT time,humidity from sensors",
+          "rawSql": "SELECT time,humidity from sensors ORDER BY time DESC limit 100",
           "refId": "A"
         }
       ],
@@ -322,7 +322,7 @@
         {
           "alias": "",
           "format": "table",
-          "rawSql": "SELECT time, temperature from sensors",
+          "rawSql": "SELECT time, temperature from sensors ORDER BY time DESC limit 100",
           "refId": "A"
         }
       ],
@@ -331,7 +331,7 @@
       "type": "table"
     }
   ],
-  "refresh": "5s",
+  "refresh": "10s",
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],
